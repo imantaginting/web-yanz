@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>My Profile</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+  /* Reset */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #1f2937, #111827);
+    color: #e5e7eb;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header & Navigation */
+  header {
+    position: sticky;
+    top: 0;
+    background: rgba(31, 41, 55, 0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    height: 56px;
+  }
+  .nav-menu {
+    display: flex;
+    gap: 24px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  .nav-menu::-webkit-scrollbar { display: none; }
+  .nav-item {
+    color: #9ca3af;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    user-select: none;
+  }
+  .nav-item:hover,
+  .nav-item.active {
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    color: white;
+  }
+  .nav-item svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  main {
+    flex-grow: 1;
+    max-width: 1200px;
+    margin: 32px auto 64px;
+    padding: 0 24px;
+    min-height: calc(100vh - 120px);
+  }
+  section {
+    display: none;
+    animation: fadeIn 0.6s ease forwards;
+  }
+  section.active {
+    display: block;
+  }
+
+  /* Welcome Section */
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .welcome h1 {
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .welcome img {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 4px solid #06b6d4;
+    box-shadow: 0 8px 24px rgb(6 182 212 / 0.6);
+    object-fit: cover;
+    animation: photoZoom 5s ease-in-out infinite alternate;
+  }
+  .welcome p {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: #d1d5db;
+  }
+
+  /* Gallery Section */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    gap: 24px;
+  }
+  .gallery-item {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgb(0 0 0 / 0.4);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    vertical-align: middle;
+    transition: transform 0.35s ease;
+  }
+  .gallery-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgb(124 58 237 / 0.6);
+    z-index: 10;
+  }
+  .gallery-item:hover img {
+    transform: scale(1.1);
+  }
+
+  /* Favorite Song Section */
+  .songs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .song-card {
+    background: rgba(31, 41, 55, 0.6);
+    border-radius: 16px;
+    padding: 20px 28px;
+    box-shadow: 0 8px 20px rgb(6 182 212 / 0.3);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: box-shadow 0.3s ease;
+  }
+  .song-card.playing {
+    box-shadow: 0 0 28px 4px #06b6d4;
+    animation: pulseLight 1.8s infinite ease-in-out;
+  }
+  .song-info {
+    flex-grow: 1;
+  }
+  .song-info h3 {
+    margin: 0;
+    font-weight: 700;
+    color: #7c3aed;
+    font-size: 1.25rem;
+  }
+  .song-info p {
+    margin: 4px 0 0;
+    color: #d1d5db;
+    font-size: 1rem;
+  }
+  .audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .audio-btn {
+    background: transparent;
+    border: none;
+    color: #06b6d4;
+    cursor: pointer;
+    font-size: 24px;
+    transition: color 0.25s ease;
+  }
+  .audio-btn:hover {
+    color: #7c3aed;
+  }
+
+  /* Contact Section */
+  .contact {
+    max-width: 400px;
+    margin: 0 auto;
+    background: rgba(31, 41, 55, 0.6);
+    padding: 24px 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgb(6 182 212 / 0.3);
+    text-align: center;
+  }
+  .contact h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+  }
+  .email-link {
+    font-size: 1.2rem;
+    color: #d1d5db;
+    user-select: all;
+    word-break: break-word;
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1.5px solid #06b6d4;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .email-link:hover {
+    background-color: #06b6d4;
+    color: #111827;
+  }
+
+  /* For You Section - heart floating container */
+  .for-you {
+    position: relative;
+    height: 400px;
+    max-width: 600px;
+    margin: 0 auto;
+    overflow: visible;
+  }
+  .hearts-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .heart {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-color: #ec4899;
+    clip-path: polygon(
+      50% 15%,
+      61% 10%,
+      75% 10%,
+      85% 20%,
+      90% 35%,
+      90% 50%,
+      80% 70%,
+      50% 90%,
+      20% 70%,
+      10% 50%,
+      10% 35%,
+      15% 20%,
+      25% 10%,
+      39% 10%
+    );
+    opacity: 0;
+    animation-name: floatUp;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  /* The hearts will fade in, float upward while fading out */
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-200px) scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+  @keyframes pulseLight {
+    0%, 100% { box-shadow: 0 0 10px 4px #06b6d4; }
+    50% { box-shadow: 0 0 18px 6px #7c3aed; }
+  }
+  @keyframes photoZoom {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+  }
+
+  /* Responsive */
+  @media (max-width: 767px) {
+    .welcome h1 {
+      font-size: 2rem;
+    }
+    main {
+      margin: 24px auto 48px;
+      padding: 0 16px;
+    }
+    .gallery-grid {
+      grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+      gap: 16px;
+    }
+    .song-card {
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+    }
+    .audio-controls {
+      justify-content: center;
+    }
+    .for-you {
+      height: 300px;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <nav aria-label="Primary Navigation">
+    <div class="nav-menu" role="menubar">
+      <button class="nav-item active" role="menuitem" aria-current="page" data-section="home">
+        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+        Home
+      </button>
+      <button class="nav-item" role="menuitem" data-section="about">
+        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg>
+        About Me
+      </button>
+      <button class="nav-item" role="menuitem" data-section="gallery">
+        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Gallery
+      </button>
+      <button class="nav-item" role="menuitem" data-section="songs">
+        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19V6l12-2v13"/></svg>
+        Favorite Song
+      </button>
+      <button class="nav-item" role="menuitem" data-section="foryou">
+        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path></svg>
+        For You
+      </button>      
+      <button class="nav-item" role="menuitem" data-section="contact">
+        <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="M4 4l8 8 8-8"/></svg>
+        Contact Me
+      </button>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section id="home" class="active" aria-label="Welcome Section">
+    <div class="welcome">
+      <h1>Welcome to My Profile</h1>
+      <img src="d:\New folder (2)\foto2.jpeg.jpeg" alt="Portrait photo of the profile owner with a cool modern style and blue background" />
+      <p>Hi! I am glad you visited my profile. Here you can explore about me, Feel free to contact me through the contact page.</p>
+    </div>
+  </section>
+
+  <section id="about" aria-label="About Me Section">
+    <div class="welcome" style="text-align:left; max-width: 700px; margin: auto;">
+      <h1>About Me</h1>
+      <p>   hello everyone, let me introduce myself, my name is Kristian Guruh Imanta Ginting.
+         I come from Medan. and I come from the Karo tribe.
+         my educational background is, I was in kindergarten at Gloria, I was in elementary school at SD Negeri 064033,
+         Iwas in junior high school at Putri Sion, and I was in senior high school at ST.PETRUS Medan.
+         and now I am continuing my studies at STMIK TIME campus, majoring in INFORMATION SYSTEMS. 
+         the courses that I really like in my major are UI/UX and those about design.
+
+         and I also have hobbies such as: playing guitar, futsal, and fishing.
+
+            another thing that I also like is discussing, being creative, and learning about business. because of business,
+          I have liked it since I was in junior high school. therefore, I have an ambition to create my own application,
+           design my own application. which, in the application will sell the products that I have later, such as food or goods.
+
+         I have   2 life mottos, namely:
+         Keep trying, even though things are getting harder &
+         Anyone can be anything.
+
+         My favorite foods: noodles, fried rice, and meatballs.
+         My favorite drinks: avocado juice, cold sweet tea.
+         My favorite colors: black & brown
+         My favorite animals: cats & dogs</p>
+      <p>Thank you for stopping by :V</p>
+    </div>
+  </section>
+
+  <section id="gallery" aria-label="Gallery Section">
+    <h1 style="text-align:center; margin-bottom: 32px; font-weight:900; font-size: 2.2rem; background: linear-gradient(135deg, #7c3aed, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Gallery</h1>
+    <div class="gallery-grid" role="list">
+      <div class="gallery-item" role="listitem">
+        <img src="d:\New folder (2)\fotoku.jpg (2).jpeg" alt="Modern artistic photo number 1 with purple background and white text" loading="lazy" />
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="d:\New folder (2)\fotoku.jpg.jpeg" alt="Scenic artistic photo number 2 with dark teal background and white text" loading="lazy" />
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="c:\Users\User\Downloads\WhatsApp Image 2025-06-12 at 07.15.42.jpeg" alt="Abstract artistic photo number 3 with deep violet background and white text" loading="lazy" />
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="c:\Users\User\Downloads\WhatsApp Image 2025-06-12 at 00.00.06.jpeg" alt="Creative photo number 4 with dark blue-green background and white text" loading="lazy" />
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="c:\Users\User\Downloads\foto 4.jpg" alt="Expressive photo number 5 with dark magenta background and white text" loading="lazy" />
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="c:\Users\User\Downloads\WhatsApp Image 2025-06-12 at 07.00.31.jpeg" alt="Vibrant photo number 6 with deep teal background and white text" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <section id="songs" aria-label="Favorite Songs Section">
+    <h1 style="text-align:center; margin-bottom: 32px; font-weight:900; font-size: 2.2rem; background: linear-gradient(135deg, #7c3aed, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Favorite Songs</h1>
+    <div class="songs-list">
+      <article class="song-card" data-song="pretty-jvke">
+        <div class="song-info">
+          <h3>pretty</h3>
+          <p>JVKE</p>
+        </div>
+        <div class="audio-controls">
+          <button class="audio-btn" aria-label="Play pretty by JVKE" title="Play/Pause">
+            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="icon-play"><polygon points="5 3 19 12 5 21"></polygon></svg>
+            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="icon-pause" style="display:none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          </button>
+          <audio preload="metadata" src="https://cdn.pixabay.com/download/audio/2022/03/23/audio_4c56270604.mp3?filename=smooth-jazz-1159.mp3"></audio>
+        </div>
+      </article>
+      <article class="song-card" data-song="somebody-aziz">
+        <div class="song-info">
+          <h3>somebody pleasure</h3>
+          <p>AZIZ HEDRA</p>
+        </div>
+        <div class="audio-controls">
+          <button class="audio-btn" aria-label="Play somebody pleasure by AZIZ HEDRA" title="Play/Pause">
+            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="icon-play"><polygon points="5 3 19 12 5 21"></polygon></svg>
+            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="icon-pause" style="display:none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+          </button>
+          <audio preload="metadata" src="https://cdn.pixabay.com/download/audio/2022/08/23/audio_2582f6e21a.mp3?filename=jazz-and-blues-11562.mp3"></audio>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="foryou" aria-label="For You Section">
+    <h1 style="text-align:center; margin-bottom: 32px; font-weight:900; font-size: 2.2rem; background: linear-gradient(135deg, #ec4899, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">For You</h1>
+    <div class="for-you" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+      <div class="hearts-container" id="heartsContainer" aria-hidden="true"></div>
+      <p style="text-align:center; font-size:1.2rem; color:#f9a8d4;">Lots of love just for you!</p>
+    </div>
+  </section>
+
+  <section id="contact" aria-label="Contact Me Section">
+    <div class="contact">
+      <h2>Contact Me</h2>
+      <a href="mailto:your.email@example.com" class="email-link" id="emailLink" aria-describedby="copyStatus">kristianimanta9@gmail.com</a>
+      <p id="copyStatus" style="color:#4ade80; font-weight:600; margin-top:8px; min-height:1.2em;" aria-live="polite" aria-atomic="true"></p>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Navigation logic
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('main section');
+  const heartsContainer = document.getElementById('heartsContainer');
+  let heartsInterval;
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      // Deactivate all nav items and sections
+      navItems.forEach(i => {
+        i.classList.remove('active');
+        i.removeAttribute('aria-current');
+      });
+      sections.forEach(s => {
+        s.classList.remove('active');
+      });
+      // Activate clicked nav and matching section
+      item.classList.add('active');
+      item.setAttribute('aria-current', 'page');
+      const target = item.getAttribute('data-section');
+      const activeSection = document.getElementById(target);
+      if(activeSection) {
+        activeSection.classList.add('active');
+      }
+      // Pause all audios when switching section
+      pauseAllAudio();
+
+      // If "For You" section activated, start heart animation
+      if(target === 'foryou') {
+        startHearts();
+      } else {
+        stopHearts();
+      }
+    });
+  });
+
+  // Audio play/pause logic with pulse animation
+  const songCards = document.querySelectorAll('.song-card');
+  songCards.forEach(card => {
+    const btn = card.querySelector('.audio-btn');
+    const audio = card.querySelector('audio');
+    btn.addEventListener('click', () => {
+      if(audio.paused) {
+        pauseAllAudio();
+        audio.play();
+        card.classList.add('playing');
+        toggleButtonIcon(btn, true);
+      } else {
+        audio.pause();
+        card.classList.remove('playing');
+        toggleButtonIcon(btn, false);
+      }
+    });
+    audio.addEventListener('ended', () => {
+      card.classList.remove('playing');
+      toggleButtonIcon(btn, false);
+    });
+  });
+
+  function pauseAllAudio() {
+    songCards.forEach(c => {
+      const a = c.querySelector('audio');
+      const b = c.querySelector('.audio-btn');
+      a.pause();
+      c.classList.remove('playing');
+      toggleButtonIcon(b, false);
+      a.currentTime = 0;
+    });
+  }
+
+  function toggleButtonIcon(button, isPlaying) {
+    const playIcon = button.querySelector('.icon-play');
+    const pauseIcon = button.querySelector('.icon-pause');
+    if(isPlaying) {
+      playIcon.style.display = 'none';
+      pauseIcon.style.display = 'inline';
+    } else {
+      playIcon.style.display = 'inline';
+      pauseIcon.style.display = 'none';
+    }
+  }
+
+  // Copy email to clipboard on click
+  const emailLink = document.getElementById('emailLink');
+  const copyStatus = document.getElementById('copyStatus');
+  emailLink.addEventListener('click', e => {
+    e.preventDefault();
+    const email = emailLink.textContent.trim();
+    navigator.clipboard.writeText(email).then(() => {
+      copyStatus.textContent = 'Email copied to clipboard!';
+      setTimeout(() => { copyStatus.textContent = ''; }, 2000);
+    });
+  });
+
+  // For You hearts animation logic
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    const x = Math.random() * heartsContainer.offsetWidth;
+    const delay = Math.random() * 3; // seconds
+    const duration = 3 + Math.random() * 3; // 3 to 6 seconds
+    const size = 16 + Math.random() * 16; // 16 to 32 px
+    heart.style.left = `${x}px`;
+    heart.style.width = `${size}px`;
+    heart.style.height = `${size}px`;
+    heart.style.animationDelay = `${delay}s`;
+    heart.style.animationDuration = `${duration}s`;
+    heartsContainer.appendChild(heart);
+
+    // Remove heart element after animation completes
+    setTimeout(() => {
+      heartsContainer.removeChild(heart);
+    }, (duration + delay) * 1000);
+  }
+
+  function startHearts() {
+    // Create initial batch quickly
+    for(let i=0; i<10; i++) {
+      setTimeout(createHeart, i * 300);
+    }
+    // Then repeatedly create hearts every 400ms
+    heartsInterval = setInterval(() => {
+      createHeart();
+    }, 400);
+  }
+  function stopHearts() {
+    clearInterval(heartsInterval);
+    // Remove all hearts
+    while(heartsContainer.firstChild) {
+      heartsContainer.removeChild(heartsContainer.firstChild);
+    }
+  }
+
+</script>
+</body>
+</html>
+
